@@ -5,11 +5,11 @@
 ## Caddy
 
 ```Caddyfile
-auth.infra.jaksi.dev {
+auth.example.com {
   reverse_proxy 127.0.0.1:8080
 }
 
-test.infra.jaksi.dev {
+test.example.com {
   forward_auth 127.0.0.1:8080 {
     uri /auth
     copy_headers X-Webauthn-User
