@@ -26,9 +26,9 @@ var (
 )
 
 type user struct {
-	ID          []byte
-	Name        string
-	Credentials []webauthn.Credential
+	ID          []byte                `json:"id"`
+	Name        string                `json:"name"`
+	Credentials []webauthn.Credential `json:"credentials"`
 }
 
 func (u *user) WebAuthnID() []byte {
@@ -113,7 +113,7 @@ func main() {
 				log.Printf("Empty username")
 				return
 			}
-			users = append(users, user{ID: generateToken(), Name: userName})
+			users = append(users, user{ID: generateToken(), Name: userName, Credentials: []webauthn.Credential{}})
 			u = &users[len(users)-1]
 			j, err := json.MarshalIndent(u, "", "  ")
 			if err != nil {
@@ -160,7 +160,6 @@ func main() {
 	})
 
 	http.HandleFunc("/auth", func(w http.ResponseWriter, r *http.Request) {
-		log.Print("/auth")
 		cookie, err := r.Cookie("Webauthn-Token")
 		if err == nil {
 			b, err := base64.StdEncoding.DecodeString(cookie.Value)
@@ -190,7 +189,6 @@ func main() {
 	})
 
 	http.HandleFunc("/login/begin", func(w http.ResponseWriter, r *http.Request) {
-		log.Print("/login/begin")
 		var options *protocol.CredentialAssertion
 		options, sessionData, err = auth.BeginDiscoverableLogin()
 		if err != nil {
@@ -205,7 +203,6 @@ func main() {
 	})
 
 	http.HandleFunc("/login/finish", func(w http.ResponseWriter, r *http.Request) {
-		log.Print("/login/finish")
 		var u *user
 		_, err := auth.FinishDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
 			for i, _ := range users {
