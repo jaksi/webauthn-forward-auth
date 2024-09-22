@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -23,6 +24,7 @@ var (
 	domain     = flag.String("domain", "", "Domain")
 	authDomain = flag.String("auth-domain", "", "Auth domain")
 	configFile = flag.String("config", "config.json", "Config file")
+	port       = flag.Uint("port", 8080, "Port")
 )
 
 type user struct {
@@ -64,6 +66,9 @@ func main() {
 	flag.Parse()
 	if *domain == "" || *authDomain == "" {
 		log.Fatalf("Domain and auth domain must be set")
+	}
+	if *port == 0 || *port > 65535 {
+		log.Fatalf("Invalid port")
 	}
 
 	loginTemplate, err := template.ParseFiles("login.html")
@@ -222,5 +227,5 @@ func main() {
 		http.SetCookie(w, &http.Cookie{Name: "Webauthn-Token", Value: base64.StdEncoding.EncodeToString(token), Domain: *domain, Path: "/"})
 	})
 
-	log.Fatal(http.ListenAndServe("127.0.0.1:8080", nil))
+	log.Fatal(http.ListenAndServe(net.JoinHostPort("127.0.0.1", fmt.Sprint(*port)), nil))
 }
