@@ -1,0 +1,16 @@
+[package]
+name = "wfa"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = { version = "0.8.4", features = ["macros"] }
+clap = { version = "4.5.37", features = ["derive"] }
+minijinja = "2.10.1"
+ron = "0.10.1"
+serde = "1.0.219"
+time = "0.3.41"
+tokio = { version = "1.44.2", features = ["macros", "rt-multi-thread"] }
+tower-sessions = "0.14.0"
+url = "2.5.4"
+webauthn-rs = { version = "0.5.1", features = ["danger-allow-state-serialisation"] }

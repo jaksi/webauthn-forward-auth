@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Register</title>
+</head>
+
+<body>
+  <script src=" https://cdn.jsdelivr.net/npm/js-base64@3.7.7/base64.min.js "></script>
+  <script>
+    function register() {
+      fetch(new Request("/register"))
+        .then((response) => response.json())
+        .then((json) => {
+          json.publicKey.challenge = Base64.toUint8Array(json.publicKey.challenge);
+          json.publicKey.user.id = Base64.toUint8Array(json.publicKey.user.id);
+          json.publicKey.excludeCredentials?.forEach(function (listItem) {
+            listItem.id = Base64.toUint8Array(listItem.id)
+          });
+          return navigator.credentials.create({ publicKey: json.publicKey });
+        })
+        .then((credential) => {
+          return fetch(new Request("/register", {
+            method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+              id: credential.id,
+              rawId: Base64.fromUint8Array(new Uint8Array(credential.rawId), true),
+              type: credential.type,
+              response: {
+                attestationObject: Base64.fromUint8Array(new Uint8Array(credential.response.attestationObject), true),
+                clientDataJSON: Base64.fromUint8Array(new Uint8Array(credential.response.clientDataJSON), true),
+              },
+            })
+          }));
+        });
+    }
+    window.addEventListener("load", function (event) { register(); });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Register</title>
+</head>
+
+<body>
+  <script src=" https://cdn.jsdelivr.net/npm/js-base64@3.7.7/base64.min.js "></script>
+  <script>
+    function register() {
+      fetch(new Request("/authenticate"))
+        .then((response) => response.json())
+        .then((json) => {
+          json.publicKey.challenge = Base64.toUint8Array(json.publicKey.challenge);
+          json.publicKey.allowCredentials?.forEach(function (listItem) {
+            listItem.id = Base64.toUint8Array(listItem.id)
+          });
+          return navigator.credentials.get({ publicKey: json.publicKey });
+        })
+        .then((credential) => {
+          return fetch(new Request("/authenticate", {
+            method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+              id: credential.id,
+              rawId: Base64.fromUint8Array(new Uint8Array(credential.rawId), true),
+              type: credential.type,
+              response: {
+                authenticatorData: Base64.fromUint8Array(new Uint8Array(credential.response.authenticatorData), true),
+                clientDataJSON: Base64.fromUint8Array(new Uint8Array(credential.response.clientDataJSON), true),
+                signature: Base64.fromUint8Array(new Uint8Array(credential.response.signature), true),
+                userHandle: Base64.fromUint8Array(new Uint8Array(credential.response.userHandle), true)
+              },
+            })
+          }));
+        }).then(() => {
+          location.assign("https://{{ redirect }}");
+        });
+    }
+    window.addEventListener("load", function (event) { register(); });
+  </script>
+</body>
+
+</html>
